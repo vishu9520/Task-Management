@@ -15,6 +15,10 @@ const taskSchema = mongoose.Schema(
       enum: ['Todo', 'In Progress', 'Completed'],
       default: 'Todo',
     },
+    progressNotes: {
+      type: String,
+      default: '',
+    },
     dueDate: {
       type: Date,
       required: [true, 'Please add a due date'],

@@ -1,18 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import api from '../utils/api';
 import { format } from 'date-fns';
+import { AuthContext } from '../context/AuthContext';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useContext(AuthContext);
 
   const fetchTasks = async () => {
     try {
-      // In a real app, this might be a dedicated /tasks endpoint, but we can reuse the dashboard data or a new endpoint.
-      // Since we don't have a GET /api/tasks endpoint in the backend for ALL tasks, we might need to add it, or just use this for the layout structure.
-      // Wait, Admin can't easily fetch ALL tasks without a new endpoint. Let's add that to backend/routes/taskRoutes.js later if needed.
-      // For now, let's assume we fetch all tasks if admin. We will need to update the backend route.
-      const res = await api.get('/tasks');
+      const endpoint = user?.role === 'Admin' ? '/tasks' : '/tasks/me';
+      const res = await api.get(endpoint);
       setTasks(res.data);
     } catch (err) {
       console.error(err);
@@ -25,9 +24,9 @@ const Tasks = () => {
     fetchTasks();
   }, []);
 
-  const handleStatusUpdate = async (taskId, newStatus) => {
+  const handleUpdate = async (taskId, updates) => {
     try {
-      await api.put(`/tasks/${taskId}`, { status: newStatus });
+      await api.put(`/tasks/${taskId}`, updates);
       fetchTasks();
     } catch (err) {
       console.error(err);
@@ -38,7 +37,7 @@ const Tasks = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">All Tasks</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">{user?.role === 'Admin' ? 'All Tasks' : 'My Tasks'}</h1>
       
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left border-collapse">
@@ -49,6 +48,7 @@ const Tasks = () => {
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Assigned To</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Due Date</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Status</th>
+              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Process Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -69,7 +69,7 @@ const Tasks = () => {
                 <td className="py-4 px-6">
                   <select
                     value={task.status}
-                    onChange={(e) => handleStatusUpdate(task._id, e.target.value)}
+                    onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
                     className={`text-sm rounded-full px-3 py-1 font-medium border-0 outline-none
                       ${task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
                         task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 
@@ -80,11 +80,24 @@ const Tasks = () => {
                     <option value="Completed">Completed</option>
                   </select>
                 </td>
+                <td className="py-4 px-6">
+                  <textarea
+                    rows="2"
+                    placeholder="Add progress updates here..."
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                    defaultValue={task.progressNotes}
+                    onBlur={(e) => {
+                      if (e.target.value !== task.progressNotes) {
+                        handleUpdate(task._id, { progressNotes: e.target.value });
+                      }
+                    }}
+                  />
+                </td>
               </tr>
             ))}
             {tasks.length === 0 && (
               <tr>
-                <td colSpan="5" className="py-8 text-center text-gray-500">No tasks found.</td>
+                <td colSpan="6" className="py-8 text-center text-gray-500">No tasks found.</td>
               </tr>
             )}
           </tbody>

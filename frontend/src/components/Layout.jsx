@@ -33,11 +33,9 @@ const Layout = () => {
           <Link to="/projects" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-primary/5 hover:text-primary-dark rounded-lg transition-colors">
             <FiFolder /> Projects
           </Link>
-          {user.role === 'Admin' && (
-            <Link to="/tasks" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-primary/5 hover:text-primary-dark rounded-lg transition-colors">
-              <FiCheckSquare /> All Tasks
-            </Link>
-          )}
+          <Link to="/tasks" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-primary/5 hover:text-primary-dark rounded-lg transition-colors">
+            <FiCheckSquare /> {user.role === 'Admin' ? 'All Tasks' : 'My Tasks'}
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-gray-200">

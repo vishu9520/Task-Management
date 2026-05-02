@@ -66,9 +66,9 @@ const ProjectDetails = () => {
     }
   };
 
-  const handleStatusUpdate = async (taskId, newStatus) => {
+  const handleUpdate = async (taskId, updates) => {
     try {
-      await api.put(`/tasks/${taskId}`, { status: newStatus });
+      await api.put(`/tasks/${taskId}`, updates);
       fetchProjectAndTasks();
     } catch (err) {
       console.error(err);
@@ -114,6 +114,7 @@ const ProjectDetails = () => {
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Assigned To</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Due Date</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Status</th>
+              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Process Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -133,7 +134,7 @@ const ProjectDetails = () => {
                   {(user?.role === 'Admin' || task.assignedTo?._id === user?._id) ? (
                     <select
                       value={task.status}
-                      onChange={(e) => handleStatusUpdate(task._id, e.target.value)}
+                      onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
                       className={`text-sm rounded-full px-3 py-1 font-medium border-0 outline-none
                         ${task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
                           task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 
@@ -152,11 +153,28 @@ const ProjectDetails = () => {
                     </span>
                   )}
                 </td>
+                <td className="py-4 px-6">
+                  {(user?.role === 'Admin' || task.assignedTo?._id === user?._id) ? (
+                    <textarea
+                      rows="2"
+                      placeholder="Add progress updates..."
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                      defaultValue={task.progressNotes}
+                      onBlur={(e) => {
+                        if (e.target.value !== task.progressNotes) {
+                          handleUpdate(task._id, { progressNotes: e.target.value });
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="text-sm text-gray-600 whitespace-pre-wrap">{task.progressNotes || '-'}</div>
+                  )}
+                </td>
               </tr>
             ))}
             {tasks.length === 0 && (
               <tr>
-                <td colSpan="4" className="py-8 text-center text-gray-500">No tasks in this project yet.</td>
+                <td colSpan="5" className="py-8 text-center text-gray-500">No tasks in this project yet.</td>
               </tr>
             )}
           </tbody>

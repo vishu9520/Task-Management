@@ -33,7 +33,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="projects" element={<Projects />} />
             <Route path="projects/:id" element={<ProjectDetails />} />
-            <Route path="tasks" element={<ProtectedRoute adminOnly><Tasks /></ProtectedRoute>} />
+            <Route path="tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
           </Route>
         </Routes>
       </Router>

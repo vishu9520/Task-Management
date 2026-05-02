@@ -50,6 +50,20 @@ const getAllTasks = async (req, res, next) => {
   }
 };
 
+// @desc    Get all tasks for logged in user (Member)
+// @route   GET /api/tasks/me
+// @access  Private
+const getMyTasks = async (req, res, next) => {
+  try {
+    const tasks = await Task.find({ assignedTo: req.user.id })
+      .populate('assignedTo', 'name email')
+      .populate('project', 'name');
+    res.status(200).json(tasks);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Create a task
 // @route   POST /api/tasks
 // @access  Private (Admin only)
@@ -102,17 +116,19 @@ const updateTask = async (req, res, next) => {
     let updatedFields = req.body;
 
     if (req.user.role !== 'Admin') {
-      // Member can only update status if assigned to them
+      // Member can only update status and progressNotes if assigned to them
       if (task.assignedTo.toString() !== req.user.id) {
         res.status(401);
         throw new Error('Not authorized to update this task');
       }
-      updatedFields = { status: req.body.status }; // Only allow status update
+      updatedFields = {};
+      if (req.body.status !== undefined) updatedFields.status = req.body.status;
+      if (req.body.progressNotes !== undefined) updatedFields.progressNotes = req.body.progressNotes;
     }
 
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
-      updatedFields,
+      { $set: updatedFields },
       { new: true }
     ).populate('assignedTo', 'name email');
 
@@ -152,6 +168,7 @@ const deleteTask = async (req, res, next) => {
 module.exports = {
   getTasks,
   getAllTasks,
+  getMyTasks,
   createTask,
   updateTask,
   deleteTask,
