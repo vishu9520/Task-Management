@@ -9,6 +9,7 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
   
@@ -21,12 +22,21 @@ const ProjectDetails = () => {
 
   const fetchProjectAndTasks = async () => {
     try {
-      const [projRes, tasksRes] = await Promise.all([
+      const promises = [
         api.get(`/projects/${id}`),
         api.get(`/tasks/project/${id}`)
-      ]);
+      ];
+      if (user?.role === 'Admin') {
+        promises.push(api.get('/auth/users'));
+      }
+      
+      const [projRes, tasksRes, usersRes] = await Promise.all(promises);
+      
       setProject(projRes.data);
       setTasks(tasksRes.data);
+      if (usersRes) {
+        setAllUsers(usersRes.data);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -175,10 +185,18 @@ const ProjectDetails = () => {
                   <label className="block text-sm font-medium text-gray-700">Assign To</label>
                   <select required className="mt-1 w-full px-3 py-2 border border-gray-300 bg-white rounded-lg focus:ring-primary focus:border-primary" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
                     <option value="" disabled>Select a team member</option>
-                    <option value={project.createdBy._id}>{project.createdBy.name} (Admin)</option>
-                    {project.members.map(member => (
-                      <option key={member._id} value={member._id}>{member.name}</option>
-                    ))}
+                    {allUsers.length > 0 ? (
+                      allUsers.map(u => (
+                        <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
+                      ))
+                    ) : (
+                      <>
+                        <option value={project.createdBy._id}>{project.createdBy.name} (Admin)</option>
+                        {project.members.map(member => (
+                          <option key={member._id} value={member._id}>{member.name}</option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
               </div>
