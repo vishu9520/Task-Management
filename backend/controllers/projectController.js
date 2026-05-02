@@ -12,8 +12,17 @@ const getProjects = async (req, res, next) => {
         $or: [{ createdBy: req.user.id }, { members: req.user.id }],
       }).populate('members', 'name email').populate('createdBy', 'name email');
     } else {
-      // Member sees only projects they are part of
-      projects = await Project.find({ members: req.user.id })
+      // Member sees projects they are part of OR have tasks assigned in
+      const Task = require('../models/Task');
+      const userTasks = await Task.find({ assignedTo: req.user.id });
+      const projectIdsFromTasks = userTasks.map(t => t.project);
+
+      projects = await Project.find({
+        $or: [
+          { members: req.user.id },
+          { _id: { $in: projectIdsFromTasks } }
+        ]
+      })
         .populate('members', 'name email')
         .populate('createdBy', 'name email');
     }
@@ -119,10 +128,18 @@ const getProjectById = async (req, res, next) => {
     }
 
     // Check access
-    if (
-      req.user.role !== 'Admin' &&
-      !project.members.some((member) => member._id.toString() === req.user.id)
-    ) {
+    let hasAccess = false;
+    if (req.user.role === 'Admin') {
+      hasAccess = true;
+    } else if (project.members.some((member) => member._id.toString() === req.user.id)) {
+      hasAccess = true;
+    } else {
+      const Task = require('../models/Task');
+      const hasTask = await Task.findOne({ project: project._id, assignedTo: req.user.id });
+      if (hasTask) hasAccess = true;
+    }
+
+    if (!hasAccess) {
       res.status(401);
       throw new Error('Not authorized to view this project');
     }

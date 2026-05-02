@@ -14,10 +14,17 @@ const getTasks = async (req, res, next) => {
     }
 
     // Check if user has access to project
-    if (
-      req.user.role !== 'Admin' &&
-      !project.members.includes(req.user.id)
-    ) {
+    let hasAccess = false;
+    if (req.user.role === 'Admin') {
+      hasAccess = true;
+    } else if (project.members.includes(req.user.id)) {
+      hasAccess = true;
+    } else {
+      const hasTask = await Task.findOne({ project: project._id, assignedTo: req.user.id });
+      if (hasTask) hasAccess = true;
+    }
+
+    if (!hasAccess) {
       res.status(401);
       throw new Error('Not authorized to view tasks for this project');
     }

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import api from '../utils/api';
 import { format } from 'date-fns';
 import { AuthContext } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -39,69 +40,78 @@ const Tasks = () => {
     <div>
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{user?.role === 'Admin' ? 'All Tasks' : 'My Tasks'}</h1>
       
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Title</th>
-              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Project</th>
-              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Assigned To</th>
-              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Due Date</th>
-              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Status</th>
-              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Process Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((task) => (
-              <tr key={task._id} className="border-b border-gray-100 hover:bg-gray-50/50">
-                <td className="py-4 px-6">
-                  <div className="font-medium text-gray-900">{task.title}</div>
-                </td>
-                <td className="py-4 px-6 text-sm text-gray-600">
-                  {task.project?.name}
-                </td>
-                <td className="py-4 px-6 text-sm text-gray-600">
-                  {task.assignedTo?.name || 'Unassigned'}
-                </td>
-                <td className="py-4 px-6 text-sm text-gray-600">
-                  {format(new Date(task.dueDate), 'MMM dd, yyyy')}
-                </td>
-                <td className="py-4 px-6">
-                  <select
-                    value={task.status}
-                    onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
-                    className={`text-sm rounded-full px-3 py-1 font-medium border-0 outline-none
-                      ${task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
-                        task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 
-                        'bg-gray-100 text-gray-700'}`}
-                  >
-                    <option value="Todo">Todo</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </td>
-                <td className="py-4 px-6">
-                  <textarea
-                    rows="2"
-                    placeholder="Add progress updates here..."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
-                    defaultValue={task.progressNotes}
-                    onBlur={(e) => {
-                      if (e.target.value !== task.progressNotes) {
-                        handleUpdate(task._id, { progressNotes: e.target.value });
-                      }
-                    }}
-                  />
-                </td>
-              </tr>
-            ))}
-            {tasks.length === 0 && (
-              <tr>
-                <td colSpan="6" className="py-8 text-center text-gray-500">No tasks found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="space-y-6">
+        {tasks.map((task) => (
+          <div key={task._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow">
+            
+            {/* Left section: Task Details */}
+            <div className="flex-1 space-y-4">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{task.title}</h3>
+                <p className="text-gray-600 mt-2 leading-relaxed">{task.description}</p>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-600 bg-gray-50 px-4 py-3 rounded-lg border border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">Project:</span>
+                  <Link to={`/projects/${task.project?._id}`} className="text-primary hover:text-primary-dark font-medium hover:underline transition-colors">
+                    {task.project?.name}
+                  </Link>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">Assigned To:</span>
+                  <span>{task.assignedTo?.name || 'Unassigned'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">Due:</span>
+                  <span className={new Date(task.dueDate) < new Date() && task.status !== 'Completed' ? 'text-red-600 font-medium' : ''}>
+                    {format(new Date(task.dueDate), 'MMM dd, yyyy')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right section: Interactive */}
+            <div className="w-full md:w-80 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
+                <select
+                  value={task.status}
+                  onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
+                  className={`w-full text-sm rounded-lg px-4 py-2.5 font-semibold border-0 outline-none cursor-pointer focus:ring-2 focus:ring-primary/20
+                    ${task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
+                      task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-gray-100 text-gray-700'}`}
+                >
+                  <option value="Todo">Todo</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              
+              <div className="flex-1 flex flex-col">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Process Notes</label>
+                <textarea
+                  placeholder="Add progress updates here..."
+                  className="w-full flex-1 min-h-[100px] px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary bg-gray-50 hover:bg-white transition-all resize-none outline-none"
+                  defaultValue={task.progressNotes}
+                  onBlur={(e) => {
+                    if (e.target.value !== task.progressNotes) {
+                      handleUpdate(task._id, { progressNotes: e.target.value });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+        
+        {tasks.length === 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+            <h3 className="text-lg font-medium text-gray-900">No tasks found</h3>
+            <p className="text-gray-500 mt-2">You don't have any tasks assigned to you right now.</p>
+          </div>
+        )}
       </div>
     </div>
   );
