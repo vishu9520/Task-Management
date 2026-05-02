@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 
 const Signup = () => {
   const [name, setName] = useState('');
+  const [userId, setUserId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Member');
@@ -21,7 +22,7 @@ const Signup = () => {
     e.preventDefault();
     setError('');
     try {
-      await register(name, email, password, role);
+      await register(name, email, password, role, userId);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -49,9 +50,20 @@ const Signup = () => {
                 type="text"
                 required
                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm mt-1"
-                placeholder="John Doe"
+                placeholder="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">User ID</label>
+              <input
+                type="text"
+                required
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm mt-1"
+                placeholder="Unique User ID"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
               />
             </div>
             <div>

@@ -13,6 +13,8 @@ const Projects = () => {
   // Form state
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [members, setMembers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   const fetchProjects = async () => {
     try {
@@ -27,15 +29,19 @@ const Projects = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+    if (user?.role === 'Admin') {
+      api.get('/auth/users').then(res => setAllUsers(res.data)).catch(err => console.error(err));
+    }
+  }, [user]);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/projects', { name, description });
+      await api.post('/projects', { name, description, members });
       setShowModal(false);
       setName('');
       setDescription('');
+      setMembers([]);
       fetchProjects();
     } catch (err) {
       console.error(err);
@@ -112,6 +118,24 @@ const Projects = () => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   ></textarea>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Members</label>
+                  <select
+                    multiple
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary bg-white h-32"
+                    value={members}
+                    onChange={(e) => {
+                      const options = [...e.target.selectedOptions];
+                      const values = options.map(option => option.value);
+                      setMembers(values);
+                    }}
+                  >
+                    {allUsers.filter(u => u._id !== user?._id).map(u => (
+                      <option key={u._id} value={u._id} className="py-1 px-2 border-b border-gray-50">{u.name} ({u.email})</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Hold Ctrl (or Cmd on Mac) to select multiple members</p>
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-3">

@@ -172,8 +172,14 @@ const ProjectDetails = () => {
                   <input type="date" required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Assign To (User ID)</label>
-                  <input type="text" required placeholder="User ObjectId" className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} />
+                  <label className="block text-sm font-medium text-gray-700">Assign To</label>
+                  <select required className="mt-1 w-full px-3 py-2 border border-gray-300 bg-white rounded-lg focus:ring-primary focus:border-primary" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
+                    <option value="" disabled>Select a team member</option>
+                    <option value={project.createdBy._id}>{project.createdBy.name} (Admin)</option>
+                    {project.members.map(member => (
+                      <option key={member._id} value={member._id}>{member.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-3">

@@ -14,15 +14,15 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, userId } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !userId) {
       res.status(400);
       throw new Error('Please add all fields');
     }
 
     // Check if user exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ $or: [{ email }, { userId }] });
 
     if (userExists) {
       res.status(400);
@@ -37,6 +37,7 @@ const registerUser = async (req, res, next) => {
     const user = await User.create({
       name,
       email,
+      userId,
       password: hashedPassword,
       role: role || 'Member',
     });
@@ -46,6 +47,7 @@ const registerUser = async (req, res, next) => {
         _id: user.id,
         name: user.name,
         email: user.email,
+        userId: user.userId,
         role: user.role,
         token: generateToken(user._id),
       });
@@ -78,6 +80,7 @@ const loginUser = async (req, res, next) => {
         _id: user.id,
         name: user.name,
         email: user.email,
+        userId: user.userId,
         role: user.role,
         token: generateToken(user._id),
       });
@@ -101,8 +104,21 @@ const getMe = async (req, res, next) => {
   }
 };
 
+// @desc    Get all users
+// @route   GET /api/auth/users
+// @access  Private
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find().select('-password');
+    res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
+  getAllUsers,
 };
