@@ -2,12 +2,14 @@ import { useState, useEffect, useContext } from 'react';
 import api from '../utils/api';
 import { format } from 'date-fns';
 import { AuthContext } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
+  const [searchParams] = useSearchParams();
+  const filter = searchParams.get('filter');
 
   const fetchTasks = async () => {
     try {
@@ -36,12 +38,34 @@ const Tasks = () => {
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
 
+  let displayedTasks = tasks;
+  if (filter === 'Completed') {
+    displayedTasks = tasks.filter(t => t.status === 'Completed');
+  } else if (filter === 'Pending') {
+    displayedTasks = tasks.filter(t => t.status !== 'Completed');
+  } else if (filter === 'Overdue') {
+    displayedTasks = tasks.filter(t => t.status !== 'Completed' && new Date(t.dueDate) < new Date());
+  }
+
+  const getPageTitle = () => {
+    let baseTitle = user?.role === 'Admin' ? 'All Tasks' : 'My Tasks';
+    if (filter) baseTitle = `${filter} Tasks`;
+    return baseTitle;
+  };
+
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{user?.role === 'Admin' ? 'All Tasks' : 'My Tasks'}</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">{getPageTitle()}</h1>
+        {filter && (
+          <Link to="/tasks" className="text-sm font-medium text-primary hover:text-primary-dark hover:underline">
+            Clear Filters
+          </Link>
+        )}
+      </div>
       
       <div className="space-y-6">
-        {tasks.map((task) => (
+        {displayedTasks.map((task) => (
           <div key={task._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow">
             
             {/* Left section: Task Details */}
@@ -106,10 +130,10 @@ const Tasks = () => {
           </div>
         ))}
         
-        {tasks.length === 0 && (
+        {displayedTasks.length === 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
             <h3 className="text-lg font-medium text-gray-900">No tasks found</h3>
-            <p className="text-gray-500 mt-2">You don't have any tasks assigned to you right now.</p>
+            <p className="text-gray-500 mt-2">There are no tasks matching your current view.</p>
           </div>
         )}
       </div>
