@@ -125,7 +125,7 @@ const Tasks = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-700">Assigned To:</span>
-                  <span>{task.assignedTo?.name || 'Unassigned'}</span>
+                  <span>{task.assignedTo?.length > 0 ? task.assignedTo.map(u => u.name).join(', ') : 'Unassigned'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-700">Start:</span>
@@ -146,7 +146,7 @@ const Tasks = () => {
             <div className="w-full md:w-80 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
-                {task.assignedTo?._id === user?._id ? (
+                {task.assignedTo?.some(u => u._id === user?._id) ? (
                   <select
                     value={task.status}
                     onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
@@ -169,7 +169,7 @@ const Tasks = () => {
                 )}
               </div>
               
-              {task.assignedTo?._id === user?._id ? (
+              {task.assignedTo?.some(u => u._id === user?._id) ? (
                 <ProcessNotesEditor task={task} onUpdate={handleUpdate} />
               ) : (
                 <div className="flex-1 flex flex-col h-full">

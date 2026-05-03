@@ -27,11 +27,10 @@ const taskSchema = mongoose.Schema(
       type: Date,
       required: [true, 'Please add a due date'],
     },
-    assignedTo: {
+    assignedTo: [{
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: 'User',
-    },
+    }],
     project: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

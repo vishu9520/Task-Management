@@ -78,7 +78,7 @@ const createTask = async (req, res, next) => {
   try {
     const { title, description, startDate, dueDate, assignedTo, project } = req.body;
 
-    if (!title || !description || !startDate || !dueDate || !assignedTo || !project) {
+    if (!title || !description || !startDate || !dueDate || !assignedTo || !Array.isArray(assignedTo) || assignedTo.length === 0 || !project) {
       res.status(400);
       throw new Error('Please add all fields');
     }
@@ -125,7 +125,7 @@ const updateTask = async (req, res, next) => {
 
     if (req.user.role !== 'Admin') {
       // Member can only update status and progressNotes if assigned to them
-      if (task.assignedTo.toString() !== req.user.id) {
+      if (!task.assignedTo.some(id => id.toString() === req.user.id)) {
         res.status(401);
         throw new Error('Not authorized to update this task');
       }

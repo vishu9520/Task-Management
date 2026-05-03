@@ -19,7 +19,8 @@ const ProjectDetails = () => {
   const [taskDesc, setTaskDesc] = useState('');
   const [startDate, setStartDate] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [assignedTo, setAssignedTo] = useState('');
+  const [assignedTo, setAssignedTo] = useState([]);
+  const [isAssignDropdownOpen, setIsAssignDropdownOpen] = useState(false);
 
   const fetchProjectAndTasks = async () => {
     try {
@@ -61,8 +62,9 @@ const ProjectDetails = () => {
         project: id
       });
       setShowTaskModal(false);
+      setIsAssignDropdownOpen(false);
       fetchProjectAndTasks();
-      setTitle(''); setTaskDesc(''); setStartDate(''); setDueDate(''); setAssignedTo('');
+      setTitle(''); setTaskDesc(''); setStartDate(''); setDueDate(''); setAssignedTo([]);
     } catch (err) {
       console.error(err);
     }
@@ -100,7 +102,10 @@ const ProjectDetails = () => {
         <h2 className="text-2xl font-bold text-gray-900">Tasks</h2>
         {user?.role === 'Admin' && (
           <button
-            onClick={() => setShowTaskModal(true)}
+            onClick={() => {
+              setShowTaskModal(true);
+              setIsAssignDropdownOpen(false);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-primary-dark text-white rounded-lg hover:bg-primary transition-colors font-medium shadow-sm text-sm"
           >
             <FiPlus /> Add Task
@@ -128,7 +133,7 @@ const ProjectDetails = () => {
                   <div className="text-sm text-gray-500">{task.description}</div>
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-600">
-                  {task.assignedTo?.name || 'Unassigned'}
+                  {task.assignedTo?.length > 0 ? task.assignedTo.map(u => u.name).join(', ') : 'Unassigned'}
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-600">
                   {task.startDate ? format(new Date(task.startDate), 'MMM dd, yyyy') : '-'}
@@ -137,7 +142,7 @@ const ProjectDetails = () => {
                   {format(new Date(task.dueDate), 'MMM dd, yyyy')}
                 </td>
                 <td className="py-4 px-6">
-                  {task.assignedTo?._id === user?._id ? (
+                  {task.assignedTo?.some(u => u._id === user?._id) ? (
                     <select
                       value={task.status}
                       onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
@@ -195,23 +200,43 @@ const ProjectDetails = () => {
                   <label className="block text-sm font-medium text-gray-700">Due Date</label>
                   <input type="date" required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Assign To</label>
-                  <select required className="mt-1 w-full px-3 py-2 border border-gray-300 bg-white rounded-lg focus:ring-primary focus:border-primary" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
-                    <option value="" disabled>Select a team member</option>
-                    {allUsers.length > 0 ? (
-                      allUsers.map(u => (
-                        <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
-                      ))
-                    ) : (
-                      <>
-                        <option value={project.createdBy._id}>{project.createdBy.name} (Admin)</option>
-                        {project.members.map(member => (
-                          <option key={member._id} value={member._id}>{member.name}</option>
-                        ))}
-                      </>
-                    )}
-                  </select>
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsAssignDropdownOpen(!isAssignDropdownOpen)}
+                    className="w-full text-left px-3 py-2 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary flex justify-between items-center"
+                  >
+                    <span className={assignedTo.length === 0 ? "text-gray-500" : "text-gray-900"}>
+                      {assignedTo.length === 0 ? "Select team member(s)" : `${assignedTo.length} member(s) selected`}
+                    </span>
+                    <svg className={`w-4 h-4 text-gray-400 transition-transform ${isAssignDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </button>
+                  
+                  {isAssignDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto border border-gray-200 bg-white shadow-lg rounded-lg p-2 space-y-1">
+                      {(allUsers.length > 0 ? allUsers : [project.createdBy, ...project.members]).map(u => (
+                        <label key={u._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                            checked={assignedTo.includes(u._id)} 
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setAssignedTo([...assignedTo, u._id]);
+                              } else {
+                                setAssignedTo(assignedTo.filter(id => id !== u._id));
+                              }
+                            }} 
+                          />
+                          <span className="text-sm font-medium text-gray-700">
+                            {u.name} <span className="text-gray-500 font-normal">({u.email})</span> {u._id === project.createdBy._id && <span className="text-xs bg-primary/10 text-primary-dark px-2 py-0.5 rounded-full ml-1">Admin</span>}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  {assignedTo.length === 0 && <p className="text-xs text-red-500 mt-1">Please select at least one assignee.</p>}
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-3">
