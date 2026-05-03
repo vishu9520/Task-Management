@@ -22,7 +22,7 @@
 
 - **🔐 Secure Authentication**: JWT-based login and signup with bcrypt password hashing.
 - **👥 Role-Based Access Control (RBAC)**: 
-  - **Admin**: Create projects, assign tasks, add members, and oversee the entire workflow.
+  - **Admin**: Create projects, assign tasks, add members, and oversee the entire workflow. *(Note: To sign up as an Admin, use the default Admin Key: `admin123`)*
   - **Member**: View assigned tasks, update task statuses (Todo ➡️ In Progress ➡️ Completed).
 - **📁 Project Management**: Group related tasks under specific projects.
 - **📊 Real-time Dashboard**: Dynamic overview of total, completed, pending, and overdue tasks.

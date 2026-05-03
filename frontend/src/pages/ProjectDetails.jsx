@@ -5,6 +5,37 @@ import { format } from 'date-fns';
 import { AuthContext } from '../context/AuthContext';
 import { FiPlus, FiArrowLeft } from 'react-icons/fi';
 
+const ProcessNotesCell = ({ task, onUpdate }) => {
+  const [notes, setNotes] = useState(task.progressNotes || '');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (notes === task.progressNotes) return;
+    setIsSaving(true);
+    await onUpdate(task._id, { progressNotes: notes });
+    setIsSaving(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 min-w-[200px]">
+      <textarea
+        rows="2"
+        placeholder="Add progress updates..."
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white resize-none outline-none"
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+      />
+      <button
+        onClick={handleSave}
+        disabled={isSaving || notes === task.progressNotes}
+        className="text-xs font-medium bg-primary-dark text-white py-1.5 px-3 rounded-md hover:bg-primary transition-colors self-end disabled:opacity-50"
+      >
+        {isSaving ? 'Saving...' : 'Submit Notes'}
+      </button>
+    </div>
+  );
+};
+
 const ProjectDetails = () => {
   const { id } = useParams();
   const [project, setProject] = useState(null);
@@ -155,17 +186,7 @@ const ProjectDetails = () => {
                 </td>
                 <td className="py-4 px-6">
                   {(user?.role === 'Admin' || task.assignedTo?._id === user?._id) ? (
-                    <textarea
-                      rows="2"
-                      placeholder="Add progress updates..."
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
-                      defaultValue={task.progressNotes}
-                      onBlur={(e) => {
-                        if (e.target.value !== task.progressNotes) {
-                          handleUpdate(task._id, { progressNotes: e.target.value });
-                        }
-                      }}
-                    />
+                    <ProcessNotesCell task={task} onUpdate={handleUpdate} />
                   ) : (
                     <div className="text-sm text-gray-600 whitespace-pre-wrap">{task.progressNotes || '-'}</div>
                   )}

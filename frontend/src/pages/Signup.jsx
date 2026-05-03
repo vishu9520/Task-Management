@@ -8,6 +8,7 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Member');
+  const [adminKey, setAdminKey] = useState('');
   const [error, setError] = useState('');
   const { register, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Signup = () => {
     e.preventDefault();
     setError('');
     try {
-      await register(name, email, password, role, userId);
+      await register(name, email, password, role, userId, adminKey);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -99,6 +100,19 @@ const Signup = () => {
                 <option value="Admin">Admin</option>
               </select>
             </div>
+            {role === 'Admin' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Admin Key</label>
+                <input
+                  type="password"
+                  required
+                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm mt-1"
+                  placeholder="Secret Admin Key"
+                  value={adminKey}
+                  onChange={(e) => setAdminKey(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div>

@@ -14,11 +14,19 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, role, userId } = req.body;
+    const { name, email, password, role, userId, adminKey } = req.body;
 
     if (!name || !email || !password || !userId) {
       res.status(400);
       throw new Error('Please add all fields');
+    }
+
+    if (role === 'Admin') {
+      const expectedAdminKey = process.env.ADMIN_SECRET_KEY || 'admin123';
+      if (adminKey !== expectedAdminKey) {
+        res.status(403);
+        throw new Error('Invalid Admin Key');
+      }
     }
 
     // Check if user exists

@@ -4,6 +4,37 @@ import { format } from 'date-fns';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useSearchParams } from 'react-router-dom';
 
+const ProcessNotesEditor = ({ task, onUpdate }) => {
+  const [notes, setNotes] = useState(task.progressNotes || '');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (notes === task.progressNotes) return;
+    setIsSaving(true);
+    await onUpdate(task._id, { progressNotes: notes });
+    setIsSaving(false);
+  };
+
+  return (
+    <div className="flex-1 flex flex-col h-full">
+      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Process Notes</label>
+      <textarea
+        placeholder="Add progress updates here..."
+        className="w-full flex-1 min-h-[100px] px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary bg-gray-50 hover:bg-white transition-all resize-none outline-none"
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+      />
+      <button
+        onClick={handleSave}
+        disabled={isSaving || notes === task.progressNotes}
+        className="mt-3 text-xs font-medium bg-primary-dark text-white py-2 px-4 rounded-lg hover:bg-primary transition-colors self-end disabled:opacity-50"
+      >
+        {isSaving ? 'Saving...' : 'Submit Notes'}
+      </button>
+    </div>
+  );
+};
+
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,19 +144,7 @@ const Tasks = () => {
                 </select>
               </div>
               
-              <div className="flex-1 flex flex-col">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Process Notes</label>
-                <textarea
-                  placeholder="Add progress updates here..."
-                  className="w-full flex-1 min-h-[100px] px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary bg-gray-50 hover:bg-white transition-all resize-none outline-none"
-                  defaultValue={task.progressNotes}
-                  onBlur={(e) => {
-                    if (e.target.value !== task.progressNotes) {
-                      handleUpdate(task._id, { progressNotes: e.target.value });
-                    }
-                  }}
-                />
-              </div>
+              <ProcessNotesEditor task={task} onUpdate={handleUpdate} />
             </div>
           </div>
         ))}
