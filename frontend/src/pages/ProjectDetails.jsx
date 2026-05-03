@@ -8,30 +8,40 @@ import { FiPlus, FiArrowLeft } from 'react-icons/fi';
 const ProcessNotesCell = ({ task, onUpdate }) => {
   const [notes, setNotes] = useState(task.progressNotes || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
+
+  useEffect(() => {
+    setNotes(task.progressNotes || '');
+  }, [task.progressNotes]);
 
   const handleSave = async () => {
     if (notes === task.progressNotes) return;
     setIsSaving(true);
     await onUpdate(task._id, { progressNotes: notes });
     setIsSaving(false);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 2000);
   };
 
   return (
     <div className="flex flex-col gap-2 min-w-[200px]">
       <textarea
         rows="2"
-        placeholder="Add progress updates..."
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white resize-none outline-none"
+        placeholder={task.status === 'Completed' ? "Task is completed." : "Add progress updates..."}
+        className={`w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none outline-none ${task.status === 'Completed' ? 'bg-gray-100 opacity-70 cursor-not-allowed text-gray-500' : 'bg-white'}`}
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
+        disabled={task.status === 'Completed'}
       />
-      <button
-        onClick={handleSave}
-        disabled={isSaving || notes === task.progressNotes}
-        className="text-xs font-medium bg-primary-dark text-white py-1.5 px-3 rounded-md hover:bg-primary transition-colors self-end disabled:opacity-50"
-      >
-        {isSaving ? 'Saving...' : 'Submit Notes'}
-      </button>
+      {task.status !== 'Completed' && (
+        <button
+          onClick={handleSave}
+          disabled={isSaving || notes === task.progressNotes}
+          className="text-xs font-medium bg-primary-dark text-white py-1.5 px-3 rounded-md hover:bg-primary transition-colors self-end disabled:opacity-50"
+        >
+          {isSaving ? 'Saving...' : showSaved ? 'Saved! ✓' : 'Submit Notes'}
+        </button>
+      )}
     </div>
   );
 };

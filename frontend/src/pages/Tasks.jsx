@@ -7,30 +7,40 @@ import { Link, useSearchParams } from 'react-router-dom';
 const ProcessNotesEditor = ({ task, onUpdate }) => {
   const [notes, setNotes] = useState(task.progressNotes || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
+
+  useEffect(() => {
+    setNotes(task.progressNotes || '');
+  }, [task.progressNotes]);
 
   const handleSave = async () => {
     if (notes === task.progressNotes) return;
     setIsSaving(true);
     await onUpdate(task._id, { progressNotes: notes });
     setIsSaving(false);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 2000);
   };
 
   return (
     <div className="flex-1 flex flex-col h-full">
       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Process Notes</label>
       <textarea
-        placeholder="Add progress updates here..."
-        className="w-full flex-1 min-h-[100px] px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary bg-gray-50 hover:bg-white transition-all resize-none outline-none"
+        placeholder={task.status === 'Completed' ? "Task is completed." : "Add progress updates here..."}
+        className={`w-full flex-1 min-h-[100px] px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none outline-none ${task.status === 'Completed' ? 'bg-gray-100 opacity-70 cursor-not-allowed text-gray-500' : 'bg-gray-50 hover:bg-white'}`}
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
+        disabled={task.status === 'Completed'}
       />
-      <button
-        onClick={handleSave}
-        disabled={isSaving || notes === task.progressNotes}
-        className="mt-3 text-xs font-medium bg-primary-dark text-white py-2 px-4 rounded-lg hover:bg-primary transition-colors self-end disabled:opacity-50"
-      >
-        {isSaving ? 'Saving...' : 'Submit Notes'}
-      </button>
+      {task.status !== 'Completed' && (
+        <button
+          onClick={handleSave}
+          disabled={isSaving || notes === task.progressNotes}
+          className="mt-3 text-xs font-medium bg-primary-dark text-white py-2 px-4 rounded-lg hover:bg-primary transition-colors self-end disabled:opacity-50"
+        >
+          {isSaving ? 'Saving...' : showSaved ? 'Saved! ✓' : 'Submit Notes'}
+        </button>
+      )}
     </div>
   );
 };
