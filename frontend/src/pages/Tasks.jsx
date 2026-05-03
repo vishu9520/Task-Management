@@ -128,6 +128,12 @@ const Tasks = () => {
                   <span>{task.assignedTo?.name || 'Unassigned'}</span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">Start:</span>
+                  <span>
+                    {task.startDate ? format(new Date(task.startDate), 'MMM dd, yyyy') : '-'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-700">Due:</span>
                   <span className={new Date(task.dueDate) < new Date() && task.status !== 'Completed' ? 'text-red-600 font-medium' : ''}>
                     {format(new Date(task.dueDate), 'MMM dd, yyyy')}

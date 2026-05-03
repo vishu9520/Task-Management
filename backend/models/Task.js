@@ -19,6 +19,10 @@ const taskSchema = mongoose.Schema(
       type: String,
       default: '',
     },
+    startDate: {
+      type: Date,
+      required: [true, 'Please add a start date'],
+    },
     dueDate: {
       type: Date,
       required: [true, 'Please add a due date'],

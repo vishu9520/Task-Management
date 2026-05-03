@@ -17,6 +17,7 @@ const ProjectDetails = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [title, setTitle] = useState('');
   const [taskDesc, setTaskDesc] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
 
@@ -54,13 +55,14 @@ const ProjectDetails = () => {
       await api.post('/tasks', {
         title,
         description: taskDesc,
+        startDate,
         dueDate,
         assignedTo,
         project: id
       });
       setShowTaskModal(false);
       fetchProjectAndTasks();
-      setTitle(''); setTaskDesc(''); setDueDate(''); setAssignedTo('');
+      setTitle(''); setTaskDesc(''); setStartDate(''); setDueDate(''); setAssignedTo('');
     } catch (err) {
       console.error(err);
     }
@@ -112,6 +114,7 @@ const ProjectDetails = () => {
             <tr className="bg-gray-50 border-b border-gray-100">
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Title</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Assigned To</th>
+              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Start Date</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Due Date</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Status</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Process Notes</th>
@@ -126,6 +129,9 @@ const ProjectDetails = () => {
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-600">
                   {task.assignedTo?.name || 'Unassigned'}
+                </td>
+                <td className="py-4 px-6 text-sm text-gray-600">
+                  {task.startDate ? format(new Date(task.startDate), 'MMM dd, yyyy') : '-'}
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-600">
                   {format(new Date(task.dueDate), 'MMM dd, yyyy')}
@@ -160,7 +166,7 @@ const ProjectDetails = () => {
             ))}
             {tasks.length === 0 && (
               <tr>
-                <td colSpan="5" className="py-8 text-center text-gray-500">No tasks in this project yet.</td>
+                <td colSpan="6" className="py-8 text-center text-gray-500">No tasks in this project yet.</td>
               </tr>
             )}
           </tbody>
@@ -180,6 +186,10 @@ const ProjectDetails = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Description</label>
                   <textarea required rows="2" className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)}></textarea>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                  <input type="date" required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Due Date</label>
