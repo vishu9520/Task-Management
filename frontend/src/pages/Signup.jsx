@@ -15,7 +15,7 @@ const Signup = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
@@ -24,7 +24,7 @@ const Signup = () => {
     setError('');
     try {
       await register(name, email, password, role, userId, adminKey);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     }

@@ -27,7 +27,7 @@ const Layout = () => {
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
-          <Link to="/" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-primary/5 hover:text-primary-dark rounded-lg transition-colors">
+          <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-primary/5 hover:text-primary-dark rounded-lg transition-colors">
             <FiLayout /> Dashboard
           </Link>
           <Link to="/projects" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-primary/5 hover:text-primary-dark rounded-lg transition-colors">

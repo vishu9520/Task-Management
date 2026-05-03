@@ -131,7 +131,7 @@ const ProjectDetails = () => {
                   {format(new Date(task.dueDate), 'MMM dd, yyyy')}
                 </td>
                 <td className="py-4 px-6">
-                  {(user?.role === 'Admin' || task.assignedTo?._id === user?._id) ? (
+                  {task.assignedTo?._id === user?._id ? (
                     <select
                       value={task.status}
                       onChange={(e) => handleUpdate(task._id, { status: e.target.value })}

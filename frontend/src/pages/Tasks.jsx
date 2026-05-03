@@ -140,21 +140,39 @@ const Tasks = () => {
             <div className="w-full md:w-80 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
-                <select
-                  value={task.status}
-                  onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
-                  className={`w-full text-sm rounded-lg px-4 py-2.5 font-semibold border-0 outline-none cursor-pointer focus:ring-2 focus:ring-primary/20
-                    ${task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
-                      task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 
-                      'bg-gray-100 text-gray-700'}`}
-                >
-                  <option value="Todo">Todo</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
+                {task.assignedTo?._id === user?._id ? (
+                  <select
+                    value={task.status}
+                    onChange={(e) => handleUpdate(task._id, { status: e.target.value })}
+                    className={`w-full text-sm rounded-lg px-4 py-2.5 font-semibold border-0 outline-none cursor-pointer focus:ring-2 focus:ring-primary/20
+                      ${task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
+                        task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 
+                        'bg-gray-100 text-gray-700'}`}
+                  >
+                    <option value="Todo">Todo</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                ) : (
+                  <div className={`w-full text-sm rounded-lg px-4 py-2.5 font-semibold border-0 outline-none
+                      ${task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
+                        task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 
+                        'bg-gray-100 text-gray-700'}`}>
+                    {task.status}
+                  </div>
+                )}
               </div>
               
-              <ProcessNotesEditor task={task} onUpdate={handleUpdate} />
+              {task.assignedTo?._id === user?._id ? (
+                <ProcessNotesEditor task={task} onUpdate={handleUpdate} />
+              ) : (
+                <div className="flex-1 flex flex-col h-full">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Process Notes</label>
+                  <div className="w-full flex-1 min-h-[100px] px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-600 whitespace-pre-wrap">
+                    {task.progressNotes || '-'}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
