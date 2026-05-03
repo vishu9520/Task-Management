@@ -139,6 +139,15 @@ const Tasks = () => {
                     {format(new Date(task.dueDate), 'MMM dd, yyyy')}
                   </span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">Priority:</span>
+                  <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide
+                    ${task.priority === 'High' ? 'bg-red-100 text-red-700' : 
+                      task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-blue-100 text-blue-700'}`}>
+                    {task.priority || 'Medium'}
+                  </span>
+                </div>
               </div>
             </div>
 

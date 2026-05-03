@@ -76,7 +76,7 @@ const getMyTasks = async (req, res, next) => {
 // @access  Private (Admin only)
 const createTask = async (req, res, next) => {
   try {
-    const { title, description, startDate, dueDate, assignedTo, project } = req.body;
+    const { title, description, startDate, dueDate, priority, assignedTo, project } = req.body;
 
     if (!title || !description || !startDate || !dueDate || !assignedTo || !Array.isArray(assignedTo) || assignedTo.length === 0 || !project) {
       res.status(400);
@@ -99,6 +99,7 @@ const createTask = async (req, res, next) => {
       description,
       startDate,
       dueDate,
+      priority: priority || 'Medium',
       assignedTo,
       project,
     });

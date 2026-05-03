@@ -27,6 +27,11 @@ const taskSchema = mongoose.Schema(
       type: Date,
       required: [true, 'Please add a due date'],
     },
+    priority: {
+      type: String,
+      enum: ['Low', 'Medium', 'High'],
+      default: 'Medium',
+    },
     assignedTo: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

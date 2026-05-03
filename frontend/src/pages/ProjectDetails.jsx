@@ -20,6 +20,7 @@ const ProjectDetails = () => {
   const [startDate, setStartDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [assignedTo, setAssignedTo] = useState([]);
+  const [priority, setPriority] = useState('Medium');
   const [isAssignDropdownOpen, setIsAssignDropdownOpen] = useState(false);
 
   const fetchProjectAndTasks = async () => {
@@ -58,13 +59,14 @@ const ProjectDetails = () => {
         description: taskDesc,
         startDate,
         dueDate,
+        priority,
         assignedTo,
         project: id
       });
       setShowTaskModal(false);
       setIsAssignDropdownOpen(false);
       fetchProjectAndTasks();
-      setTitle(''); setTaskDesc(''); setStartDate(''); setDueDate(''); setAssignedTo([]);
+      setTitle(''); setTaskDesc(''); setStartDate(''); setDueDate(''); setPriority('Medium'); setAssignedTo([]);
     } catch (err) {
       console.error(err);
     }
@@ -119,6 +121,7 @@ const ProjectDetails = () => {
             <tr className="bg-gray-50 border-b border-gray-100">
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Title</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Assigned To</th>
+              <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Priority</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Start Date</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Due Date</th>
               <th className="py-4 px-6 font-semibold text-gray-600 text-sm">Status</th>
@@ -134,6 +137,14 @@ const ProjectDetails = () => {
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-600">
                   {task.assignedTo?.length > 0 ? task.assignedTo.map(u => u.name).join(', ') : 'Unassigned'}
+                </td>
+                <td className="py-4 px-6">
+                  <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold
+                    ${task.priority === 'High' ? 'bg-red-100 text-red-700' : 
+                      task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-blue-100 text-blue-700'}`}>
+                    {task.priority || 'Medium'}
+                  </span>
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-600">
                   {task.startDate ? format(new Date(task.startDate), 'MMM dd, yyyy') : '-'}
@@ -171,7 +182,7 @@ const ProjectDetails = () => {
             ))}
             {tasks.length === 0 && (
               <tr>
-                <td colSpan="6" className="py-8 text-center text-gray-500">No tasks in this project yet.</td>
+                <td colSpan="7" className="py-8 text-center text-gray-500">No tasks in this project yet.</td>
               </tr>
             )}
           </tbody>
@@ -199,6 +210,14 @@ const ProjectDetails = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Due Date</label>
                   <input type="date" required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Priority</label>
+                  <select required className="mt-1 w-full px-3 py-2 border border-gray-300 bg-white rounded-lg focus:ring-primary focus:border-primary" value={priority} onChange={(e) => setPriority(e.target.value)}>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
                 </div>
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Assign To</label>

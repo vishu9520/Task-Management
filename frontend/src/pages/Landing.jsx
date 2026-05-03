@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { FiCheckCircle, FiLayout, FiUsers, FiCheckSquare, FiLock, FiTrendingUp } from 'react-icons/fi';
-import mockupImg from '../assets/mockup.png';
 
 const Landing = () => {
   return (
@@ -57,7 +56,7 @@ const Landing = () => {
         <div className="relative">
           <div className="absolute inset-0 bg-primary/5 rounded-2xl transform translate-x-4 translate-y-4 -z-10"></div>
           <img 
-            src={mockupImg} 
+            src="https://images.unsplash.com/photo-1569674696698-55826970039a?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
             alt="TaskHub Dashboard Preview" 
             className="rounded-2xl shadow-2xl border border-gray-100 object-cover w-full h-auto"
           />
